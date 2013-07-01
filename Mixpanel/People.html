@@ -523,7 +523,7 @@ tracker.people.set(&quot;12345&quot;, {
           
           <div class="method-heading">
             <span class="method-name">track_charge</span><span
-              class="method-args">(distinct_id, amount, properties, ip=nil)</span>
+              class="method-args">(distinct_id, amount, properties={}, ip=nil)</span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
           
@@ -549,7 +549,7 @@ mixpanel.people.track_charge(&quot;12345&quot;, 30.50, {
             <div class="method-source-code" id="track_charge-source">
 <pre>
 <span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 182</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">track_charge</span>(<span class="ruby-identifier">distinct_id</span>, <span class="ruby-identifier">amount</span>, <span class="ruby-identifier">properties</span>, <span class="ruby-identifier">ip</span>=<span class="ruby-keyword">nil</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">track_charge</span>(<span class="ruby-identifier">distinct_id</span>, <span class="ruby-identifier">amount</span>, <span class="ruby-identifier">properties</span>={}, <span class="ruby-identifier">ip</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-identifier">properties</span> = <span class="ruby-identifier">fix_property_dates</span>(<span class="ruby-identifier">properties</span>)
   <span class="ruby-identifier">charge_properties</span> = <span class="ruby-identifier">properties</span>.<span class="ruby-identifier">merge</span>({ <span class="ruby-string">'$amount'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">amount</span> })
   <span class="ruby-identifier">append</span>(<span class="ruby-identifier">distinct_id</span>, { <span class="ruby-string">'$transactions'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">charge_properties</span> }, <span class="ruby-identifier">ip</span>)
@@ -671,7 +671,7 @@ specification, and passing the message as a dict to <a
 href="People.html#method-i-update">update</a>. This method might be useful
 if you want to use very new or experimental features of people analytics
 from Ruby The Mixpanel HTTP tracking API is documented at <a
-href="http://joe.dev.mixpanel.org/help/reference/http">joe.dev.mixpanel.org/help/reference/http</a></p>
+href="https://mixpanel.com/help/reference/http">mixpanel.com/help/reference/http</a></p>
             
 
             
