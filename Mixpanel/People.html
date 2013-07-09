@@ -85,6 +85,8 @@
           
           <li><a href="#method-i-increment">#increment</a></li>
           
+          <li><a href="#method-i-plus_one">#plus_one</a></li>
+          
           <li><a href="#method-i-set">#set</a></li>
           
           <li><a href="#method-i-set_once">#set_once</a></li>
@@ -265,7 +267,7 @@ tracker.people.append(&quot;12345&quot;, {
             
             <div class="method-source-code" id="append-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 121</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 132</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">append</span>(<span class="ruby-identifier">distinct_id</span>, <span class="ruby-identifier">properties</span>, <span class="ruby-identifier">ip</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-identifier">properties</span> = <span class="ruby-identifier">fix_property_dates</span>(<span class="ruby-identifier">properties</span>)
   <span class="ruby-identifier">message</span> = {
@@ -308,7 +310,7 @@ tracker.people.append(&quot;12345&quot;, {
             
             <div class="method-source-code" id="clear_charges-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 189</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 200</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">clear_charges</span>(<span class="ruby-identifier">distinct_id</span>)
   <span class="ruby-identifier">unset</span>(<span class="ruby-identifier">distinct_id</span>, <span class="ruby-string">'$transactions'</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -341,7 +343,7 @@ tracker.people.append(&quot;12345&quot;, {
             
             <div class="method-source-code" id="delete_user-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 194</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 205</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_user</span>(<span class="ruby-identifier">distinct_id</span>)
   <span class="ruby-identifier">update</span>({
       <span class="ruby-string">'$distinct_id'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">distinct_id</span>,
@@ -377,7 +379,7 @@ whatever value is currently assigned to the property. If no property exists
 with a given name, the value will be added to zero.</p>
 
 <pre>tracker = Mixpanel::Tracker.new
-tracker.people.set(&quot;12345&quot;, {
+tracker.people.increment(&quot;12345&quot;, {
     'Coins Spent' =&gt; 7,
     'Coins Earned' =&gt; -7, # Use a negative number to subtract
 });</pre>
@@ -408,6 +410,46 @@ tracker.people.set(&quot;12345&quot;, {
 
           
         </div><!-- increment-method -->
+
+      
+        <div id="plus_one-method" class="method-detail ">
+          <a name="method-i-plus_one"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">plus_one</span><span
+              class="method-args">(distinct_id, property_name, ip=nil)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Convenience method- increases the value of a numeric property by one.
+Calling <a href="People.html#method-i-plus_one">plus_one</a>(distinct_id,
+property_name) is the same as calling <a
+href="People.html#method-i-increment">increment</a>(distinct_id, {
+property_name =&gt; 1 })</p>
+
+<pre>tracker = Mixpanel::Tracker.new
+tracker.people.plus_one(&quot;12345&quot;, &quot;Albums Released&quot;)</pre>
+            
+
+            
+            <div class="method-source-code" id="plus_one-source">
+<pre>
+<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 118</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">plus_one</span>(<span class="ruby-identifier">distinct_id</span>, <span class="ruby-identifier">property_name</span>, <span class="ruby-identifier">ip</span>=<span class="ruby-keyword">nil</span>)
+  <span class="ruby-identifier">increment</span>(<span class="ruby-identifier">distinct_id</span>, { <span class="ruby-identifier">property_name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> }, <span class="ruby-identifier">ip</span>)
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- plus_one-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- plus_one-method -->
 
       
         <div id="set-method" class="method-detail ">
@@ -548,7 +590,7 @@ mixpanel.people.track_charge(&quot;12345&quot;, 30.50, {
             
             <div class="method-source-code" id="track_charge-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 182</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 193</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">track_charge</span>(<span class="ruby-identifier">distinct_id</span>, <span class="ruby-identifier">amount</span>, <span class="ruby-identifier">properties</span>={}, <span class="ruby-identifier">ip</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-identifier">properties</span> = <span class="ruby-identifier">fix_property_dates</span>(<span class="ruby-identifier">properties</span>)
   <span class="ruby-identifier">charge_properties</span> = <span class="ruby-identifier">properties</span>.<span class="ruby-identifier">merge</span>({ <span class="ruby-string">'$amount'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">amount</span> })
@@ -589,7 +631,7 @@ tracker.people.union(&quot;12345&quot;, {
             
             <div class="method-source-code" id="union-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 143</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 154</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">union</span>(<span class="ruby-identifier">distinct_id</span>, <span class="ruby-identifier">properties</span>, <span class="ruby-identifier">ip</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-identifier">properties</span> = <span class="ruby-identifier">fix_property_dates</span>(<span class="ruby-identifier">properties</span>)
   <span class="ruby-identifier">message</span> = {
@@ -626,7 +668,7 @@ tracker.people.union(&quot;12345&quot;, {
 
           <div class="method-description">
             
-            <p>Removes a property and it's value from a profile.</p>
+            <p>Removes a property and its value from a profile.</p>
 
 <pre>tracker = Mixpanel::Tracker.new
 tracker.people.unset(&quot;12345&quot;, &quot;Overdue Since&quot;)</pre>
@@ -635,7 +677,7 @@ tracker.people.unset(&quot;12345&quot;, &quot;Overdue Since&quot;)</pre>
             
             <div class="method-source-code" id="unset-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 162</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 173</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">unset</span>(<span class="ruby-identifier">distinct_id</span>, <span class="ruby-identifier">property</span>)
   <span class="ruby-identifier">update</span>({
       <span class="ruby-string">'$distinct_id'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">distinct_id</span>,
@@ -677,7 +719,7 @@ href="https://mixpanel.com/help/reference/http">mixpanel.com/help/reference/http
             
             <div class="method-source-code" id="update-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 209</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/people.rb, line 220</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>(<span class="ruby-identifier">message</span>)
   <span class="ruby-identifier">message</span> = {
       <span class="ruby-string">'$token'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@token</span>,
