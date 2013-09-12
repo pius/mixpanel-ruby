@@ -67,6 +67,8 @@
           
           <li><a href="#method-c-new">::new</a></li>
           
+          <li><a href="#method-i-import">#import</a></li>
+          
           <li><a href="#method-i-track">#track</a></li>
           
         </ul>
@@ -212,6 +214,76 @@ tracker = Mixpanel::Tracker.new(...)</pre>
         <h3 class="section-header">Public Instance Methods</h3>
 
       
+        <div id="import-method" class="method-detail ">
+          <a name="method-i-import"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">import</span><span
+              class="method-args">(api_key, distinct_id, event, properties={}, ip=nil)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Imports an event that has occurred in the past, along with a distinct_id
+representing the source of that event (for example, a user id), an event
+name describing the event and a set of properties describing that event.
+Properties are provided as a Hash with string keys and strings, numbers or
+booleans as values.</p>
+
+<pre>tracker = Mixpanel::Tracker.new
+
+# Track that user &quot;12345&quot;'s credit card was declined
+tracker.import(&quot;API_KEY&quot;, &quot;12345&quot;, &quot;Credit Card Declined&quot;)
+
+# Properties describe the circumstances of the event,
+# or aspects of the source or user associated with the event
+tracker.import(&quot;API_KEY&quot;, &quot;12345&quot;, &quot;Welcome Email Sent&quot;, {
+    'Email Template' =&gt; 'Pretty Pink Welcome',
+    'User Sign-up Cohort' =&gt; 'July 2013'
+})</pre>
+            
+
+            
+            <div class="method-source-code" id="import-source">
+<pre>
+<span class="ruby-comment"># File lib/mixpanel-ruby/events.rb, line 91</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">import</span>(<span class="ruby-identifier">api_key</span>, <span class="ruby-identifier">distinct_id</span>, <span class="ruby-identifier">event</span>, <span class="ruby-identifier">properties</span>={}, <span class="ruby-identifier">ip</span>=<span class="ruby-keyword">nil</span>)
+  <span class="ruby-identifier">properties</span> = {
+    <span class="ruby-string">'distinct_id'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">distinct_id</span>,
+    <span class="ruby-string">'token'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@token</span>,
+    <span class="ruby-string">'time'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>.<span class="ruby-identifier">to_i</span>,
+    <span class="ruby-string">'mp_lib'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'ruby'</span>,
+    <span class="ruby-string">'$lib_version'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Mixpanel</span><span class="ruby-operator">::</span><span class="ruby-constant">VERSION</span>
+  }.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">properties</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">ip</span>
+    <span class="ruby-identifier">properties</span>[<span class="ruby-string">'ip'</span>] = <span class="ruby-identifier">ip</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">data</span> = {
+    <span class="ruby-string">'event'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">event</span>,
+    <span class="ruby-string">'properties'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">properties</span>
+  }
+
+  <span class="ruby-identifier">message</span> = {
+    <span class="ruby-string">'data'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">data</span>,
+    <span class="ruby-string">'api_key'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">api_key</span>
+  }
+
+  <span class="ruby-ivar">@sink</span>.<span class="ruby-identifier">call</span>(<span class="ruby-value">:import</span>, <span class="ruby-identifier">message</span>.<span class="ruby-identifier">to_json</span>)
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- import-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- import-method -->
+
+      
         <div id="track-method" class="method-detail ">
           <a name="method-i-track"></a>
 
@@ -260,9 +332,13 @@ tracker.track(&quot;12345&quot;, &quot;Welcome Email Sent&quot;, {
     <span class="ruby-identifier">properties</span>[<span class="ruby-string">'ip'</span>] = <span class="ruby-identifier">ip</span>
   <span class="ruby-keyword">end</span>
 
+  <span class="ruby-identifier">data</span> = {
+    <span class="ruby-string">'event'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">event</span>,
+    <span class="ruby-string">'properties'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">properties</span>
+  }
+
   <span class="ruby-identifier">message</span> = {
-      <span class="ruby-string">'event'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">event</span>,
-      <span class="ruby-string">'properties'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">properties</span>
+    <span class="ruby-string">'data'</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">data</span>
   }
 
   <span class="ruby-ivar">@sink</span>.<span class="ruby-identifier">call</span>(<span class="ruby-value">:event</span>, <span class="ruby-identifier">message</span>.<span class="ruby-identifier">to_json</span>)

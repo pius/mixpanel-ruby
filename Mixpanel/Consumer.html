@@ -146,7 +146,7 @@ tracker, or just passing a block to <a
 href="Tracker.html#method-c-new">Mixpanel::Tracker.new</a></p>
 
 <pre>tracker = Mixpanel::Tracker.new(MY_TOKEN) do |type, message|
-    # type will be one of :event or :profile_update
+    # type will be one of :event, :profile_update or :import
     @kestrel.set(ANALYTICS_QUEUE, [ type, message ].to_json)
 end</pre>
 
@@ -190,7 +190,7 @@ href="../Mixpanel.html">Mixpanel</a>.</p>
           
           <div class="method-heading">
             <span class="method-name">new</span><span
-              class="method-args">(events_endpoint=nil, update_endpoint=nil)</span>
+              class="method-args">(events_endpoint=nil, update_endpoint=nil, import_endpoint=nil)</span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
           
@@ -207,9 +207,10 @@ proxying, debugging, or if you prefer not to use SSL for your events.</p>
             <div class="method-source-code" id="new-source">
 <pre>
 <span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 59</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">events_endpoint</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">update_endpoint</span>=<span class="ruby-keyword">nil</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">events_endpoint</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">update_endpoint</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">import_endpoint</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-ivar">@events_endpoint</span> = <span class="ruby-identifier">events_endpoint</span> <span class="ruby-operator">||</span> <span class="ruby-string">'https://api.mixpanel.com/track'</span>
   <span class="ruby-ivar">@update_endpoint</span> = <span class="ruby-identifier">update_endpoint</span> <span class="ruby-operator">||</span> <span class="ruby-string">'https://api.mixpanel.com/engage'</span>
+  <span class="ruby-ivar">@import_endpoint</span> = <span class="ruby-identifier">import_endpoint</span> <span class="ruby-operator">||</span> <span class="ruby-string">'https://api.mixpanel.com/import'</span>
 <span class="ruby-keyword">end</span></pre>
             </div><!-- new-source -->
             
@@ -241,8 +242,8 @@ proxying, debugging, or if you prefer not to use SSL for your events.</p>
           <div class="method-description">
             
             <p>Send the given string message to <a href="../Mixpanel.html">Mixpanel</a>.
-Type should be one of :event or :profile_update, which will determine the
-endpoint.</p>
+Type should be one of :event, :profile_update or :import, which will
+determine the endpoint.</p>
 
 <p><a href="Consumer.html#method-i-send">Mixpanel::Consumer#send</a> sends
 messages to <a href="../Mixpanel.html">Mixpanel</a> immediately on each
@@ -254,22 +255,29 @@ href="BufferedConsumer.html">Mixpanel::BufferedConsumer</a></p>
             
             <div class="method-source-code" id="send-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 70</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 71</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">send</span>(<span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span>)
   <span class="ruby-identifier">type</span> = <span class="ruby-identifier">type</span>.<span class="ruby-identifier">to_sym</span>
   <span class="ruby-identifier">endpoint</span> = {
     <span class="ruby-value">:event</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@events_endpoint</span>,
     <span class="ruby-value">:profile_update</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@update_endpoint</span>,
+    <span class="ruby-value">:import</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@import_endpoint</span>
   }[ <span class="ruby-identifier">type</span> ]
-  <span class="ruby-identifier">data</span> = <span class="ruby-constant">Base64</span>.<span class="ruby-identifier">strict_encode64</span>(<span class="ruby-identifier">message</span>)
+
+  <span class="ruby-identifier">decoded_message</span> = <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">load</span>(<span class="ruby-identifier">message</span>)
+  <span class="ruby-identifier">api_key</span> = <span class="ruby-identifier">decoded_message</span>[<span class="ruby-string">&quot;api_key&quot;</span>]
+  <span class="ruby-identifier">data</span> = <span class="ruby-constant">Base64</span>.<span class="ruby-identifier">encode64</span>(<span class="ruby-identifier">decoded_message</span>[<span class="ruby-string">&quot;data&quot;</span>].<span class="ruby-identifier">to_json</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-string">&quot;\n&quot;</span>, <span class="ruby-string">''</span>)
+
   <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>(<span class="ruby-identifier">endpoint</span>)
 
   <span class="ruby-identifier">client</span> = <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTP</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>, <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">port</span>)
   <span class="ruby-identifier">client</span>.<span class="ruby-identifier">use_ssl</span> = <span class="ruby-keyword">true</span>
   <span class="ruby-constant">Mixpanel</span>.<span class="ruby-identifier">with_http</span>(<span class="ruby-identifier">client</span>)
 
+  <span class="ruby-identifier">form_data</span> = { <span class="ruby-string">&quot;data&quot;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">data</span> }
+  <span class="ruby-identifier">form_data</span>.<span class="ruby-identifier">merge!</span>(<span class="ruby-string">&quot;api_key&quot;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">api_key</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">api_key</span>
   <span class="ruby-identifier">request</span> = <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTP</span><span class="ruby-operator">::</span><span class="ruby-constant">Post</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">request_uri</span>)
-  <span class="ruby-identifier">request</span>.<span class="ruby-identifier">set_form_data</span>({<span class="ruby-string">&quot;data&quot;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">data</span> })
+  <span class="ruby-identifier">request</span>.<span class="ruby-identifier">set_form_data</span>(<span class="ruby-identifier">form_data</span>)
   <span class="ruby-identifier">response</span> = <span class="ruby-identifier">client</span>.<span class="ruby-identifier">request</span>(<span class="ruby-identifier">request</span>)
 
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">response</span>.<span class="ruby-identifier">code</span> <span class="ruby-operator">==</span> <span class="ruby-string">'200'</span> <span class="ruby-keyword">and</span> <span class="ruby-identifier">response</span>.<span class="ruby-identifier">body</span> <span class="ruby-operator">==</span> <span class="ruby-string">'1'</span>
