@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
 
   <title>Module: Mixpanel</title>
 
@@ -138,8 +138,6 @@
         
           <li><a href="./Mixpanel/People.html">Mixpanel::People</a></li>
         
-          <li><a href="./Mixpanel/People/PeopleDate.html">Mixpanel::People::PeopleDate</a></li>
-        
           <li><a href="./Mixpanel/Tracker.html">Mixpanel::Tracker</a></li>
         
         </ul>
@@ -201,12 +199,17 @@
 
           <div class="method-description">
             
-            <p>Ruby's default SSL does not verify the server certificate. To verify a
-certificate, or install a proxy, pass a block to Mixpanel::use_ssl that
+            <p>This method exists for backwards compatibility. The preferred way to
+customize or configure the HTTP library of a consumer is to override <a
+href="Mixpanel/Consumer.html#method-i-request">Consumer#request</a>.</p>
+
+<p>Ruby’s default SSL does not verify the server certificate. To verify a
+certificate, or install a proxy, pass a block to <a
+href="Mixpanel.html#method-c-config_http">Mixpanel.config_http</a> that
 configures the Net::HTTP object. For example, if running in Ubuntu Linux,
 you can run</p>
 
-<pre>Mixpanel::use_ssl do |http|
+<pre>Mixpanel.config_http do |http|
     http.ca_path = '/etc/ssl/certs'
     http.ca_file = '/etc/ssl/certs/ca-certificates.crt'
     http.verify_mode = OpenSSL::SSL::VERIFY_PEER
@@ -220,7 +223,7 @@ block to configure their connections</p>
             
             <div class="method-source-code" id="config_http-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 23</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 28</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">config_http</span>(&amp;<span class="ruby-identifier">block</span>)
   <span class="ruby-identifier">@@init_http</span> = <span class="ruby-identifier">block</span>
 <span class="ruby-keyword">end</span></pre>

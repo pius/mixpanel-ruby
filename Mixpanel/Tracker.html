@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
 
   <title>Class: Mixpanel::Tracker</title>
 
@@ -120,8 +120,6 @@
         
           <li><a href="../Mixpanel/People.html">Mixpanel::People</a></li>
         
-          <li><a href="../Mixpanel/People/PeopleDate.html">Mixpanel::People::PeopleDate</a></li>
-        
           <li><a href="../Mixpanel/Tracker.html">Mixpanel::Tracker</a></li>
         
         </ul>
@@ -141,12 +139,12 @@
 profile updates in your application. To track an event, call</p>
 
 <pre>tracker = Mixpanel::Tracker.new(YOUR_MIXPANEL_TOKEN)
-Mixpanel::Tracker.track(a_distinct_id, an_event_name, { properties })</pre>
+Mixpanel::Tracker.track(a_distinct_id, an_event_name, {properties})</pre>
 
 <p>To send people updates, call</p>
 
 <pre>tracker = Mixpanel::Tracker.new(YOUR_MIXPANEL_TOKEN)
-tracker.people.set(a_distinct_id, { properties })</pre>
+tracker.people.set(a_distinct_id, {properties})</pre>
 
 <p>You can find your project token in the settings dialog for your project,
 inside of the <a href="../Mixpanel.html">Mixpanel</a> web application.</p>

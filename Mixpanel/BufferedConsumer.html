@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
 
   <title>Class: Mixpanel::BufferedConsumer</title>
 
@@ -118,8 +118,6 @@
         
           <li><a href="../Mixpanel/People.html">Mixpanel::People</a></li>
         
-          <li><a href="../Mixpanel/People/PeopleDate.html">Mixpanel::People::PeopleDate</a></li>
-        
           <li><a href="../Mixpanel/Tracker.html">Mixpanel::Tracker</a></li>
         
         </ul>
@@ -196,7 +194,7 @@ end</pre>
           
           <div class="method-heading">
             <span class="method-name">new</span><span
-              class="method-args">(events_endpoint=nil, update_endpoint=nil, import_endpoint=nil, max_buffer_length=MAX_LENGTH)</span>
+              class="method-args">(events_endpoint=nil, update_endpoint=nil, import_endpoint=nil, max_buffer_length=MAX_LENGTH, &block)</span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
           
@@ -213,15 +211,29 @@ automatically sends its buffered events. The <a
 href="../Mixpanel.html">Mixpanel</a> endpoints have a limit of 50 events
 per HTTP request, but you can lower the limit if your individual events are
 very large.</p>
+
+<p>By default, <a href="BufferedConsumer.html">BufferedConsumer</a> will use a
+standard <a href="../Mixpanel.html">Mixpanel</a> consumer to send the
+events once the buffer is full (or on calls to <a
+href="BufferedConsumer.html#method-i-flush">flush</a>), but you can
+override this behavior by passing a block to the constructor, in the same
+way you might pass a block to the <a
+href="Tracker.html">Mixpanel::Tracker</a> constructor. If a block is passed
+to the constructor, the *_endpoint constructor arguments are ignored.</p>
             
 
             
             <div class="method-source-code" id="new-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 135</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">events_endpoint</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">update_endpoint</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">import_endpoint</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">max_buffer_length</span>=<span class="ruby-constant">MAX_LENGTH</span>)
-  <span class="ruby-ivar">@max_length</span> = [ <span class="ruby-identifier">max_buffer_length</span>, <span class="ruby-constant">MAX_LENGTH</span> ].<span class="ruby-identifier">min</span>
-  <span class="ruby-ivar">@consumer</span> = <span class="ruby-constant">Consumer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">events_endpoint</span>, <span class="ruby-identifier">update_endpoint</span>, <span class="ruby-identifier">import_endpoint</span>)
+<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 165</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">events_endpoint</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">update_endpoint</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">import_endpoint</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">max_buffer_length</span>=<span class="ruby-constant">MAX_LENGTH</span>, &amp;<span class="ruby-identifier">block</span>)
+  <span class="ruby-ivar">@max_length</span> = [<span class="ruby-identifier">max_buffer_length</span>, <span class="ruby-constant">MAX_LENGTH</span>].<span class="ruby-identifier">min</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">block</span>
+    <span class="ruby-ivar">@sink</span> = <span class="ruby-identifier">block</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">consumer</span> = <span class="ruby-constant">Consumer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">events_endpoint</span>, <span class="ruby-identifier">update_endpoint</span>, <span class="ruby-identifier">import_endpoint</span>)
+    <span class="ruby-ivar">@sink</span> = <span class="ruby-identifier">consumer</span>.<span class="ruby-identifier">method</span>(<span class="ruby-value">:send</span>)
+  <span class="ruby-keyword">end</span>
   <span class="ruby-ivar">@buffers</span> = {
     <span class="ruby-value">:event</span> =<span class="ruby-operator">&gt;</span> [],
     <span class="ruby-value">:profile_update</span> =<span class="ruby-operator">&gt;</span> [],
@@ -265,7 +277,7 @@ application exits or messages may not be sent.</p>
             
             <div class="method-source-code" id="flush-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 165</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 200</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">flush</span>
   <span class="ruby-ivar">@buffers</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span><span class="ruby-operator">|</span> <span class="ruby-identifier">flush_type</span>(<span class="ruby-identifier">k</span>) }
 <span class="ruby-keyword">end</span></pre>
@@ -303,7 +315,7 @@ messages will be send immediately on call.</p>
             
             <div class="method-source-code" id="send-source">
 <pre>
-<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 150</span>
+<span class="ruby-comment"># File lib/mixpanel-ruby/consumer.rb, line 185</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">send</span>(<span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span>)
   <span class="ruby-identifier">type</span> = <span class="ruby-identifier">type</span>.<span class="ruby-identifier">to_sym</span>
   <span class="ruby-keyword">if</span> <span class="ruby-ivar">@buffers</span>.<span class="ruby-identifier">has_key?</span> <span class="ruby-identifier">type</span>
@@ -312,7 +324,7 @@ messages will be send immediately on call.</p>
       <span class="ruby-identifier">flush_type</span>(<span class="ruby-identifier">type</span>)
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">else</span>
-    <span class="ruby-ivar">@consumer</span>.<span class="ruby-identifier">send</span>(<span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span>)
+    <span class="ruby-ivar">@sink</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span>)
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
             </div><!-- send-source -->
