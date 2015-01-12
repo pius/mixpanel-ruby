@@ -36,7 +36,7 @@ describe Mixpanel::Events do
     @events.track('TEST ID', 'Test Event', {
         'Circumstances' => 'During a test'
     }, nil, true)
-    @log.should eq([[:event, 'data' => {
+    expect(@log).to eq([[:event, 'data' => {
         'event' => 'Test Event',
         'properties' => {
             'Circumstances' => 'During a test',

@@ -53,7 +53,7 @@ describe Mixpanel::Tracker do
 
 
     a = mixpanel.track('TEST ID', 'TEST EVENT', {'Circumstances' => 'During test'}, nil, true)
-    a.should eq "https://api.mixpanel.com/track?data=eyJldmVudCI6IlRFU1QgRVZFTlQiLCJwcm9wZXJ0aWVzIjp7ImRpc3RpbmN0X2lkIjoiVEVTVCBJRCIsInRva2VuIjoiVEVTVCBUT0tFTiIsInRpbWUiOjc2NzIwOTg0LCJtcF9saWIiOiJydWJ5IiwiJGxpYl92ZXJzaW9uIjoiMS40LjAiLCJDaXJjdW1zdGFuY2VzIjoiRHVyaW5nIHRlc3QifX0%3D&verbose=1&img=1"
+    expect(a).to eq "https://api.mixpanel.com/track?data=eyJldmVudCI6IlRFU1QgRVZFTlQiLCJwcm9wZXJ0aWVzIjp7ImRpc3RpbmN0X2lkIjoiVEVTVCBJRCIsInRva2VuIjoiVEVTVCBUT0tFTiIsInRpbWUiOjc2NzIwOTg0LCJtcF9saWIiOiJydWJ5IiwiJGxpYl92ZXJzaW9uIjoiMS40LjAiLCJDaXJjdW1zdGFuY2VzIjoiRHVyaW5nIHRlc3QifX0%3D&verbose=1&img=1"
 
     WebMock.should_not have_requested(:post, 'https://api.mixpanel.com/track')
     WebMock.should_not have_requested(:get, 'https://api.mixpanel.com/track')
