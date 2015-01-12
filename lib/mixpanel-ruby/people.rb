@@ -218,11 +218,13 @@ module Mixpanel
     end
 
     # Permanently delete a profile from \Mixpanel people analytics
-    def delete_user(distinct_id)
+    # To delete a user and ignore alias pass into optional params
+    #   {"$ignore_alias"=>true}
+    def delete_user(distinct_id, optional_params={})
       update({
           '$distinct_id' => distinct_id,
           '$delete' => ''
-      })
+      }.merge(optional_params))
     end
 
     # Send a generic update to \Mixpanel people analytics.
@@ -250,6 +252,7 @@ module Mixpanel
 
     def fix_property_dates(h)
       h.inject({}) do |ret,(k,v)|
+        v = v.respond_to?(:new_offset) ? v.new_offset('0') : v
         ret[k] = v.respond_to?(:strftime) ? v.strftime('%Y-%m-%dT%H:%M:%S') : v
         ret
       end
