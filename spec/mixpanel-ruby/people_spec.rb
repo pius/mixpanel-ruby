@@ -4,7 +4,7 @@ require 'mixpanel-ruby/people'
 describe Mixpanel::People do
   before(:each) do
     @time_now = Time.parse('Jun 6 1972, 16:23:04')
-    Time.stub(:now).and_return(@time_now)
+    allow(Time).to receive(:now).and_return(@time_now)
 
     @log = []
     @people = Mixpanel::People.new('TEST TOKEN') do |type, message|
@@ -17,7 +17,7 @@ describe Mixpanel::People do
         '$firstname' => 'David',
         '$lastname' => 'Bowie',
     })
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -32,7 +32,21 @@ describe Mixpanel::People do
     @people.set("TEST ID", {
         'created_at' => DateTime.new(2013, 1, 2, 3, 4, 5)
     })
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
+        '$token' => 'TEST TOKEN',
+        '$distinct_id' => 'TEST ID',
+        '$time' => @time_now.to_i * 1000,
+        '$set' => {
+            'created_at' => '2013-01-02T03:04:05'
+        }
+    }]])
+  end
+
+  it 'should convert offset datetimes to UTC' do
+    @people.set("TEST ID", {
+        'created_at' => DateTime.new(2013, 1, 1, 18, 4, 5, '-9')
+    })
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -47,7 +61,7 @@ describe Mixpanel::People do
         '$firstname' => 'David',
         '$lastname' => 'Bowie',
     })
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -60,7 +74,7 @@ describe Mixpanel::People do
 
   it 'should send a well formed engage/add message' do
     @people.increment("TEST ID", {'Albums Released' => 10})
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -72,7 +86,7 @@ describe Mixpanel::People do
 
   it 'should send an engage/add message with a value of 1' do
     @people.plus_one("TEST ID", 'Albums Released')
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -84,7 +98,7 @@ describe Mixpanel::People do
 
   it 'should send a well formed engage/append message' do
     @people.append("TEST ID", {'Albums' => 'Diamond Dogs'})
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -96,7 +110,7 @@ describe Mixpanel::People do
 
   it 'should send a well formed engage/union message' do
     @people.union("TEST ID", {'Albums' => ['Diamond Dogs']})
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -108,7 +122,7 @@ describe Mixpanel::People do
 
   it 'should send a well formed unset message' do
     @people.unset('TEST ID', 'Albums')
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -118,7 +132,7 @@ describe Mixpanel::People do
 
   it 'should send a well formed unset message with multiple properties' do
     @people.unset('TEST ID', ['Albums', 'Vinyls'])
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -131,7 +145,7 @@ describe Mixpanel::People do
         '$time' => DateTime.new(1999,12,24,14, 02, 53),
         'SKU' => '1234567'
     })
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -147,7 +161,7 @@ describe Mixpanel::People do
 
   it 'should send a well formed engage/unset message for $transaction' do
     @people.clear_charges("TEST ID")
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
@@ -157,11 +171,33 @@ describe Mixpanel::People do
 
   it 'should send a well formed engage/delete message' do
     @people.delete_user("TEST ID")
-    @log.should eq([[:profile_update, 'data' => {
+    expect(@log).to eq([[:profile_update, 'data' => {
         '$token' => 'TEST TOKEN',
         '$distinct_id' => 'TEST ID',
         '$time' => @time_now.to_i * 1000,
         '$delete' => ''
     }]])
   end
+
+  it 'should send a well formed engage/delete message with blank optional_params' do
+    @people.delete_user("TEST ID", {})
+    expect(@log).to eq([[:profile_update, 'data' => {
+        '$token' => 'TEST TOKEN',
+        '$distinct_id' => 'TEST ID',
+        '$time' => @time_now.to_i * 1000,
+        '$delete' => ''
+    }]])
+  end
+
+  it 'should send a well formed engage/delete message with ignore_alias true' do
+    @people.delete_user("TEST ID", {"$ignore_alias"=>true})
+    expect(@log).to eq([[:profile_update, 'data' => {
+        '$token' => 'TEST TOKEN',
+        '$distinct_id' => 'TEST ID',
+        '$time' => @time_now.to_i * 1000,
+        '$delete' => '',
+        "$ignore_alias"=>true
+    }]])
+  end
+
 end
